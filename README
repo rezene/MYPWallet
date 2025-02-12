@@ -1,0 +1,38 @@
+Mnemonic: moment wing lobster public flag palm cradle robot attract shoot screen prevent
+Seed <Buffer 9c 49 18 2e 0d e3 51 93 48 7d 7d fd 5b 95 ec 34 dc 86 30 9e 79 77 ef 8a 19 0a f0 b6 50 5c 28 f3 bb a8 7e fc 82 d0 5a 32 96 d9 32 13 60 8e e0 fe d8 1e ... 14 more bytes>
+Network {
+  messagePrefix: '\x18Bitcoin Signed Message:\n',
+  bech32: 'tb',
+  bip32: { public: 70617039, private: 70615956 },
+  pubKeyHash: 111,
+  scriptHash: 196,
+  wif: 239
+}
+Root BIP32 {
+  __D: Uint8Array(32) [
+    245, 211, 149, 163, 252, 251, 245, 179,
+     57,  17,  16,  14,  47,  32,  54, 236,
+    137, 235, 239,  90,  53,  18,  83,  43,
+    194, 186, 188,  74,  51, 115, 162, 194
+  ],
+  __Q: undefined,
+  lowR: false,
+  chainCode: Uint8Array(32) [
+     96, 164,  80, 178, 157, 247, 250, 218,
+     50, 104, 200,  79,  35, 173, 178,  78,
+    225, 202,   5,  95,  10,  25,  50,  98,
+     94,   0,  59, 226,  63,  13, 215, 120
+  ],
+  network: {
+    messagePrefix: '\x18Bitcoin Signed Message:\n',
+    bech32: 'bc',
+    bip32: { public: 76067358, private: 76066276 },
+    pubKeyHash: 0,
+    scriptHash: 5,
+    wif: 128
+  },
+  __DEPTH: 0,
+  __INDEX: 0,
+  __PARENT_FINGERPRINT: 0
+}
+Generated Address: ms56iVZMGxitDhsZKuch8jQVqDpuxJ8Po6
