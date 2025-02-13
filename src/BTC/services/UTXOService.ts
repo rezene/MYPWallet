@@ -5,11 +5,8 @@ import { IConfigurationReader } from '../../utils/IConfigurationReader';
 class UTXOService implements IUTXOService {
     private httpClient;
     private apiConfig:any;
-   
-
     constructor({ httpClient, configReader, configDirectory, configFilename }: UTXOServiceDependencies) {
         this.httpClient = httpClient;
-
         this.initializeConfig(configReader, configDirectory, configFilename);
     }
 

@@ -2,7 +2,7 @@
 import { ITransactionServiceDependencies } from '../interfaces/ITransactionService';
 
 
-class TransactionService {
+export class TransactionService {
     private httpClient;
     private apiConfig;
     constructor({httpClient, apiConfig}: ITransactionServiceDependencies) {

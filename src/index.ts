@@ -1,4 +1,4 @@
-import { BitcoinWallet } from './BTC/wallet';
+import { BitcoinWallet } from './BTC/BitcoinWallet';
 
 const bitcoin = require('bitcoinjs-lib');
 const axios = require('axios');
@@ -8,22 +8,35 @@ import { httpClient } from './utils/httpClient';
 import ConfigurationReader from './utils/ConfigurationReader';
 import UTXOService from './BTC/services/UTXOService';
 import {UTXOServiceDependencies} from './BTC/interfaces/IUTXOService';
-import entropyToBIP39Menemonic  from './utils/entropyToBIP39Menemonic';
+
+import { MnemonicStrategySelector } from './BTC/walletGenerationStrategies/mnemonic/mnemonicStrategySelector';
+import {EntropyMYPStrategySelector} from './BTC/walletGenerationStrategies/entropyMYP/entropyMYPStrategySelector'
 const crypto = require('crypto');
 
 const myp2='f0bZbra0kgyjUdwQLG1xWhtjN6iIScWbjscaeZlvP8ioc8mo1SgXSELgS6ScF1cL74NEDntXp9go38fwlQSHwstP6iSy0UIEJyq6wt0G4IpssDeIop8douXzw5doC4eG'
+console.log("myp2 lenght", myp2.length)
+//console.log(entropyToBIP39Menemonic(myp2));
 
-console.log(entropyToBIP39Menemonic(myp2));
-const menimonic= "moment wing lobster public flag palm cradle robot attract shoot screen prevent";
-const wallet = new BitcoinWallet(menimonic);
-console.log("Mnemonic",wallet.getMnemonic());
+const mnemonic= "moment wing lobster public flag palm cradle robot attract shoot screen prevent";
+const network=  bitcoin.networks.testnet;
+//const wallet = new BitcoinWallet(mnemonic, network);
+
+const mnemonicSelector = new MnemonicStrategySelector(mnemonic, network);
+const wallet = new BitcoinWallet(mnemonicSelector, network);
+console.log('Address-menmonic:', wallet.generateAddress());
+
+const entropyMYPSelector = new EntropyMYPStrategySelector(myp2, network);
+const walletFromSeed = new BitcoinWallet(entropyMYPSelector, network);
+
+console.log('Address-seed:', walletFromSeed.generateAddress());
+
+/*console.log("Mnemonic",wallet.getMnemonic());
 console.log("Seed",wallet.getSeed());
 console.log("Network",wallet.getNetwork());
-console.log("Root",wallet.getRoot());
+console.log("Root",wallet.getRoot());*/
 
-
-const address = wallet.generateAddress();
-console.log('Generated Address:', address);
+//const address = wallet.generateAddress();
+//console.log('Generated Address:', address);
 
 const configDirectory = path.join(__dirname, './config');
 const configFilename = 'api.json'; 

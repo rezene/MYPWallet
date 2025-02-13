@@ -1,7 +1,6 @@
 import BIP32Factory, { BIP32Interface } from 'bip32';
 import * as ecc from 'tiny-secp256k1';
 import * as bip39 from 'bip39';
-
 import * as bitcoin from 'bitcoinjs-lib';
 
 const bip32 = BIP32Factory(ecc);
@@ -12,14 +11,13 @@ export class BitcoinWallet {
     private seed: Buffer;
     private root: BIP32Interface;
 
-    constructor(mnemonic?: string, network: bitcoin.Network = bitcoin.networks.testnet) {
-        this.network = network;
+    constructor(mnemonic?: string, network?: bitcoin.Network) {
+        this.network = network ||  bitcoin.networks.testnet;
         this.mnemonic = mnemonic || bip39.generateMnemonic(256);
         this.seed = bip39.mnemonicToSeedSync(this.mnemonic);
         this.root = bip32.fromSeed(this.seed);
     }
 
-    // Get the mnemonic phrase
     getMnemonic(): string {
         return this.mnemonic;
     }
