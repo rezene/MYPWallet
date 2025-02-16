@@ -3,11 +3,16 @@ import { BitcoinWallet } from './BTC/BitcoinWallet';
 const bitcoin = require('bitcoinjs-lib');
 const axios = require('axios');
 import * as path from 'path';
+import BIP32Factory from 'bip32';
+import * as ecc from 'tiny-secp256k1';
+import { BIP32Interface } from 'bip32';
+// You must wrap a tiny-secp256k1 compatible implementation
+const bip32 = BIP32Factory(ecc);
 
 import { httpClient } from './utils/httpClient';
 import ConfigurationReader from './utils/ConfigurationReader';
 import UTXOService from './BTC/services/UTXOService';
-import {UTXOServiceDependencies} from './BTC/interfaces/IUTXOService';
+import {UTXOServiceDependencies} from './BTC/interfaces/IUTXOService-old';
 
 import { MnemonicStrategySelector } from './BTC/walletGenerationStrategies/mnemonic/mnemonicStrategySelector';
 import {EntropyMYPStrategySelector} from './BTC/walletGenerationStrategies/entropyMYP/entropyMYPStrategySelector'
@@ -17,16 +22,31 @@ const myp2='f0bZbra0kgyjUdwQLG1xWhtjN6iIScWbjscaeZlvP8ioc8mo1SgXSELgS6ScF1cL74NE
 console.log("myp2 lenght", myp2.length)
 //console.log(entropyToBIP39Menemonic(myp2));
 
+
 const mnemonic= "moment wing lobster public flag palm cradle robot attract shoot screen prevent";
 const network=  bitcoin.networks.testnet;
 //const wallet = new BitcoinWallet(mnemonic, network);
 
 const mnemonicSelector = new MnemonicStrategySelector(mnemonic, network);
 const wallet = new BitcoinWallet(mnemonicSelector, network);
+
+//const node: BIP32Interface = bip32.fromBase58('xprv9s21ZrQH143K3QTDL4LXw2F7HEK3wJUD2nW2nRk4stbPy6cq3jPPqjiChkVvvNKmPGJxWUtg6LnF5kejMRNNU3TGtRBeJgk33yuGBxrMPHi');
+const node: BIP32Interface = wallet.getRoot();
+// Convert node to xpub string
+const xpriv: string = node.toBase58();
+const xpub = node.neutered().toBase58();
+console.log("xpriv", xpriv);
+console.log("xpub", xpub);
+
+// ...
+
+
 console.log('Address-menmonic:', wallet.generateAddress());
 
 const entropyMYPSelector = new EntropyMYPStrategySelector(myp2, network);
 const walletFromSeed = new BitcoinWallet(entropyMYPSelector, network);
+
+
 
 console.log('Address-seed:', walletFromSeed.generateAddress());
 
@@ -69,9 +89,7 @@ async function getUTXO(txid: string, vout: number): Promise<UTXO> {
         if (vout < 0 || vout >= transaction.vout.length) {
             throw new Error('Invalid vout index');
         }
-
         const output = transaction.vout[vout];
-
         return {
             scriptPubKey: output.scriptpubkey,
             value: output.value * 1e8, // Convert from BTC to satoshis if necessary
@@ -92,7 +110,6 @@ async function fetchUTXO() {
     }
 }
  fetchUTXO();
-
 
 const utxos = [
     {

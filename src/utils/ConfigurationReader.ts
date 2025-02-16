@@ -1,7 +1,7 @@
 
 import * as path from 'path';
 import * as fs from 'fs/promises';
-import { IConfigurationReader } from './IConfigurationReader';
+import { IConfigurationReader } from './IConfigurationReader-old';
 
 class ConfigurationReader implements IConfigurationReader {
     public async readConfig(directory: string, filename: string): Promise<any> { 

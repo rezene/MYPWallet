@@ -1,0 +1,191 @@
+import axios from 'axios';
+import * as bitcoin from 'bitcoinjs-lib';
+import { ECPairInterface } from 'ecpair';
+import * as ecc from 'tiny-secp256k1';
+
+// Initialize bitcoinjs-lib with tiny-secp256k1
+bitcoin.initEccLib(ecc);
+
+class BitcoinTestnetService {
+    private baseUrl: string;
+    private network: bitcoin.Network;
+
+    constructor() {
+        this.baseUrl = 'https://blockstream.info/testnet/api';
+        this.network = bitcoin.networks.testnet;
+    }
+
+    /**
+     * Get the balance of a Bitcoin address.
+     */
+    async getBalance(address: string): Promise<number> {
+        const url = `${this.baseUrl}/address/${address}/utxo`;
+        const response = await axios.get(url);
+        const utxos = response.data;
+
+        let balance = 0;
+        utxos.forEach((utxo: any) => {
+            balance += utxo.value;
+        });
+
+        return balance;
+    }
+
+    /**
+     * Get transactions for a Bitcoin address.
+     */
+    async getTransactions(address: string): Promise<any[]> {
+        const url = `${this.baseUrl}/address/${address}/txs`;
+        const response = await axios.get(url);
+        return response.data;
+    }
+
+    /**
+     * Create a raw transaction.
+     */
+    createTransaction(
+        utxos: any[],
+        toAddress: string,
+        amount: number,
+        changeAddress: string,
+        feeRate: number = 10 // satoshis per byte
+    ): bitcoin.Psbt {
+        const psbt = new bitcoin.Psbt({ network: this.network });
+
+        let totalInput = 0;
+        utxos.forEach((utxo) => {
+            totalInput += utxo.value;
+            psbt.addInput({
+                hash: utxo.txid,
+                index: utxo.vout,
+                witnessUtxo: {
+                    script: bitcoin.address.toOutputScript(utxo.address, this.network),
+                    value: utxo.value,
+                },
+            });
+        });
+
+        const totalOutput = amount + feeRate * 100; // Estimate fee
+        if (totalInput < totalOutput) {
+            throw new Error('Insufficient funds');
+        }
+
+        psbt.addOutput({
+            address: toAddress,
+            value: amount,
+        });
+
+        // Add change output
+        if (totalInput > totalOutput) {
+            psbt.addOutput({
+                address: changeAddress,
+                value: totalInput - totalOutput,
+            });
+        }
+
+        return psbt;
+    }
+
+    /**
+     * Sign a transaction with a private key.
+     */
+    signTransaction(psbt: bitcoin.Psbt, keyPair: ECPairInterface): bitcoin.Psbt {
+        psbt.data.inputs.forEach((_, index) => {
+            psbt.signInput(index, keyPair);
+        });
+        return psbt;
+    }
+
+    /**
+     * Broadcast a signed transaction to the Bitcoin network.
+     */
+    async broadcastTransaction(hex: string): Promise<string> {
+        const url = `${this.baseUrl}/tx`;
+        const response = await axios.post(url, hex, {
+            headers: { 'Content-Type': 'text/plain' },
+        });
+        return response.data;
+    }
+
+    /**
+     * Send a transaction (combines create, sign, and broadcast).
+     */
+    async sendTransaction(
+        utxos: any[],
+        toAddress: string,
+        amount: number,
+        changeAddress: string,
+        keyPair: ECPairInterface
+    ): Promise<string> {
+        const psbt = this.createTransaction(utxos, toAddress, amount, changeAddress);
+        const signedPsbt = this.signTransaction(psbt, keyPair);
+        const finalizedPsbt = signedPsbt.finalizeAllInputs();
+        const txHex = finalizedPsbt.extractTransaction().toHex();
+        return this.broadcastTransaction(txHex);
+    }
+}
+
+// Usage Example
+(async () => {
+    const bitcoinService = new BitcoinTestnetService();
+
+    // Example: Get balance
+    const address = 'mjXZwmEi1z1J7cL3bK5qJ7K6Z8J9XZ1Z1Z';
+    const balance = await bitcoinService.getBalance(address);
+    console.log('Balance:', balance);
+
+    // Example: Get transactions
+    const transactions = await bitcoinService.getTransactions(address);
+    console.log('Transactions:', transactions);
+
+    // Example: Send transaction
+    const keyPair = bitcoin.ECPair.makeRandom({ network: bitcoin.networks.testnet }); // Replace with your key pair
+    const utxos = [
+        {
+            txid: 'previous-txid',
+            vout: 0,
+            value: 100000, // satoshis
+            address: address,
+        },
+    ];
+    const toAddress = 'recipient-address';
+    const amount = 50000; // satoshis
+    const changeAddress = address;
+
+    const txId = await bitcoinService.sendTransaction(utxos, toAddress, amount, changeAddress, keyPair);
+    console.log('Transaction ID:', txId);
+})();
+
+Explanation of Methods:
+getBalance:
+
+Fetches the UTXOs (Unspent Transaction Outputs) for a given address and calculates the total balance.
+
+getTransactions:
+
+Retrieves the transaction history for a given address.
+
+createTransaction:
+
+Creates a raw transaction (PSBT - Partially Signed Bitcoin Transaction) using UTXOs, a recipient address, and a change address.
+
+signTransaction:
+
+Signs the transaction using a private key (ECPair).
+
+broadcastTransaction:
+
+Sends the signed transaction to the Bitcoin network.
+
+sendTransaction:
+
+Combines createTransaction, signTransaction, and broadcastTransaction into a single method for convenience.
+
+Notes:
+Dependencies: Ensure you have bitcoinjs-lib, tiny-secp256k1, and axios installed.
+
+Key Pair: Replace the keyPair with your actual private key or use a library like bip39 to derive it from a mnemonic.
+
+Error Handling: Add proper error handling for production use.
+
+Fee Calculation: The fee calculation is simplified. You can improve it by dynamically calculating the transaction size.

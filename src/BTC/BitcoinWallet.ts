@@ -14,7 +14,6 @@ export class BitcoinWallet {
     getNetwork(): bitcoin.Network {
         return this.network;
     }
-
     getRoot(): BIP32Interface {
         return this.root;
     }
@@ -29,10 +28,20 @@ export class BitcoinWallet {
             pubkey: pubkeyBuffer,
             network: this.network,
         });
-
         return address!;
     }
 
+    generateChangeAddress(index: number = 0): string {
+        const path = `m/44'/1'/0'/1/${index}`;
+        const child = this.root.derivePath(path);
+
+        const pubkeyBuffer = Buffer.from(child.publicKey);
+        const { address } = bitcoin.payments.p2pkh({
+            pubkey: pubkeyBuffer,
+            network: this.network,
+        });
+        return address!;
+    }
     // Create a transaction
     createTransaction(recipientAddress: string, amount: number, fee: number, utxos: any[]): bitcoin.Psbt {
         const psbt = new bitcoin.Psbt({ network: this.network });
@@ -55,7 +64,7 @@ export class BitcoinWallet {
             value: amount,
         });
         psbt.addOutput({
-            address: this.generateAddress(),
+            address: this.generateChangeAddress(),
             value: totalInput - amount - fee,
         });
 
@@ -82,4 +91,18 @@ export class BitcoinWallet {
         psbt.signInput(index, signer);
         return psbt;
     }
+/*
+    function generateAccountXpub(rootNode: bip32.BIP32Interface, accountIndex: number = 0): string {
+        // Derive the account node
+        const accountNode = rootNode
+            .deriveHardened(44)  // Purpose (BIP44)
+            .deriveHardened(0)   // Coin type (Bitcoin)
+            .deriveHardened(accountIndex); // Account index
+    
+        // Neutered the account node to get the xpub
+        const accountXpub = accountNode.neutered().toBase58();
+        return accountXpub;
+    }
+
+  */
 }

@@ -1,4 +1,4 @@
 import axios, { AxiosInstance } from 'axios';
-// axios.defaults.baseURL = 'https://api.myp.com';
-
-export const httpClient: AxiosInstance = axios;
+export const httpClient: AxiosInstance = axios.create({
+    baseURL: 'https://blockstream.info/testnet',
+});

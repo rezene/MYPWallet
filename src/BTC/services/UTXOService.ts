@@ -1,6 +1,6 @@
 
-import { IUTXOService, UTXOServiceDependencies } from '../interfaces/IUTXOService';
-import { IConfigurationReader } from '../../utils/IConfigurationReader';
+import { IUTXOService, UTXOServiceDependencies } from '../interfaces/IUTXOService-old';
+import { IConfigurationReader } from '../../utils/IConfigurationReader-old';
 
 class UTXOService implements IUTXOService {
     private httpClient;

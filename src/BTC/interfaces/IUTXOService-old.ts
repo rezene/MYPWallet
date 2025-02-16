@@ -1,5 +1,5 @@
 import { httpClient } from '../../utils/httpClient';
-import { IConfigurationReader } from '../../utils/IConfigurationReader';
+import { IConfigurationReader } from '../../utils/IConfigurationReader-old';
 
 export interface IUTXOService {
     getUTXOsByAddress(address: string): Promise<any>; 
