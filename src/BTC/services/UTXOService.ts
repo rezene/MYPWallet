@@ -1,30 +1,34 @@
-
-import { IUTXOService, UTXOServiceDependencies } from '../interfaces/IUTXOService-old.js';
-import { IConfigurationReader } from '../../utils/IConfigurationReader-old.js';
-
-class UTXOService implements IUTXOService {
+export class UtxoService{
     private httpClient;
-    private apiConfig:any;
-    constructor({ httpClient, configReader, configDirectory, configFilename }: UTXOServiceDependencies) {
-        this.httpClient = httpClient;
-        this.initializeConfig(configReader, configDirectory, configFilename);
+    constructor(httpClient: any) {
+        this.httpClient= httpClient
     }
+async getUTXOs(address: string): Promise<any[]> {
+    const url = `/address/${address}/utxo`;
+    const response = await this.httpClient.get(url);
+    const utxos = Array.isArray(response.data) ? response.data : [];
 
-    private async initializeConfig(configReader: IConfigurationReader, directory: string, filename: string) {
-        this.apiConfig = await configReader.readConfig(directory, filename);
-    }
+    // Fetch scriptPubKey for each UTXO
+    const utxosWithScriptPubKey = await Promise.all(
+        utxos.map(async (utxo:any) => {
+            const txUrl = `/tx/${utxo.txid}`;
+            const txResponse = await this.httpClient.get(txUrl);
+            const txDetails = txResponse.data;
+        
+            // Find the output corresponding to the UTXO's vout
+            const output = txDetails.vout[utxo.vout];
+            if (!output || !output.scriptpubkey) {
+                throw new Error(`Could not find scriptPubKey for UTXO: ${utxo.txid}:${utxo.vout}`);
+            }
 
-    async getUTXOsByAddress(address: string): Promise<any> {
-        const url = this.apiConfig.getUTXOsByAddress.replace('${address}', address);
-        try {
-            const response = await this.httpClient.get(url);
-            console.log('UTXOs:', response.data);
-            return response.data; 
-        } catch (error) {
-            console.error('Error fetching UTXOs:', error);
-            throw error; 
-        }
-    }
+            // Add scriptPubKey to the UTXO object
+            return {
+                ...utxo,
+                scriptPubKey: output.scriptpubkey,
+            };
+        })
+    );
+
+    return utxosWithScriptPubKey;
 }
-
-export default UTXOService;
+}

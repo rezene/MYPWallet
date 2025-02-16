@@ -1,24 +1,17 @@
 import  {BitcoinWallet}  from './BTC/BitcoinWallet.js';
-
 import bitcoin from 'bitcoinjs-lib';
-import * as path from 'path';
 import BIP32Factory from 'bip32';
 import * as ecc from 'tiny-secp256k1';
 import { BIP32Interface } from 'bip32';
 // You must wrap a tiny-secp256k1 compatible implementation
 const bip32 = BIP32Factory(ecc);
-
-import { httpClient } from './utils/httpClient.js';
-import ConfigurationReader from './utils/ConfigurationReader.js';
-import UTXOService from './BTC/services/UTXOService.js';
-import {UTXOServiceDependencies} from './BTC/interfaces/IUTXOService-old.js';
-
 import { MnemonicStrategySelector } from './BTC/walletGenerationStrategies/mnemonic/mnemonicStrategySelector.js';
 import {EntropyMYPStrategySelector} from './BTC/walletGenerationStrategies/entropyMYP/entropyMYPStrategySelector.js'
-import {getWalletBalance,  getBalance} from './BTC/services/WalletBalance.js'
-import { getUTXOs } from './BTC/services/UTXOServices.js';
+
 import crypto from 'crypto';
-import { deriveChangeAddress, deriveMainAddress } from './BTC/services/AddressServices.js';
+
+import { BitcoinService } from './BTC/services/BitcoinService.js';
+import { httpClient } from './utils/httpClient.js';
 const network=  bitcoin.networks.testnet;
 const myp2='f0bZbra0kgyjUdwQLG1xWhtjN6iIScWbjscaeZlvP8ioc8mo1SgXSELgS6ScF1cL74NEDntXp9go38fwlQSHwstP6iSy0UIEJyq6wt0G4IpssDeIop8douXzw5doC4eG'
 console.log("myp2 lenght", myp2.length)
@@ -44,13 +37,18 @@ const xpub = node.neutered().toBase58();
 console.log("xpriv", xpriv);
 console.log("xpub", xpub);
 
-const totalBalance =await getWalletBalance(xpub,network);
-console.log('Total Wallet Balance:', totalBalance);
-const mainAddress=deriveMainAddress(xpub,0,network);
+const btcService= new BitcoinService(xpub,network,httpClient);
+try{
+const totalBalance =await btcService.getWalletBalanceService().getWalletBalance(0);
+const mainAddress=btcService.getAddressService().deriveMainAddress(0);
 console.log('deriveMainAddress:', mainAddress);
-console.log('balance main address:', await getBalance(mainAddress));
-const changeAddress=await deriveChangeAddress(xpub,0,network);
-console.log("balance in change address:",changeAddress, await getBalance(changeAddress));
+console.log('balance main address:', await btcService.getWalletBalanceService().getBalance(mainAddress));
+const changeAddress=await btcService.getAddressService().deriveChangeAddress(0);
+console.log('Total Wallet Balance:', totalBalance);
+console.log("balance in change address:",changeAddress, await btcService.getWalletBalanceService().getBalance(changeAddress));
+} catch (error) {
+    console.error('Failed to fetch services:', error);
+}
 
 /*console.log("Mnemonic",wallet.getMnemonic());
 console.log("Seed",wallet.getSeed());
