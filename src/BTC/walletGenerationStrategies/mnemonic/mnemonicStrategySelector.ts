@@ -1,6 +1,6 @@
-import RootKeyStrategy from '../rootKeyStrategy';
-import StrategySelector from '../strategySelector';
-import { MnemonicStrategy } from './mnemonicStrategy';
+import RootKeyStrategy from '../rootKeyStrategy.js';
+import StrategySelector from '../strategySelector.js';
+import { MnemonicStrategy } from './mnemonicStrategy.js';
 
 import * as bitcoin from 'bitcoinjs-lib';
 export class MnemonicStrategySelector implements StrategySelector {

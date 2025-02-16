@@ -1,6 +1,6 @@
-import RootKeyStrategy from '../rootKeyStrategy';
-import StrategySelector from '../strategySelector';
-import { EntropyStrategy } from './entropyStrategy';
+import RootKeyStrategy from '../rootKeyStrategy.js';
+import StrategySelector from '../strategySelector.js';
+import { EntropyStrategy } from './entropyStrategy.js';
 
 import * as bitcoin from 'bitcoinjs-lib';
 export class EntropyStrategySelector implements StrategySelector {

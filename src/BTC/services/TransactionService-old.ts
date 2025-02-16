@@ -1,5 +1,5 @@
 
-import { ITransactionServiceDependencies } from '../interfaces/ITransactionService';
+import { ITransactionServiceDependencies } from '../interfaces/ITransactionService-old.js';
 
 
  class TransactionService {

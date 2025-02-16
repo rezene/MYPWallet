@@ -1,6 +1,6 @@
 
-import { IUTXOService, UTXOServiceDependencies } from '../interfaces/IUTXOService-old';
-import { IConfigurationReader } from '../../utils/IConfigurationReader-old';
+import { IUTXOService, UTXOServiceDependencies } from '../interfaces/IUTXOService-old.js';
+import { IConfigurationReader } from '../../utils/IConfigurationReader-old.js';
 
 class UTXOService implements IUTXOService {
     private httpClient;

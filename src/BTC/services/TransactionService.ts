@@ -1,4 +1,4 @@
-import * as bitcoin from 'bitcoinjs-lib';
+/*import * as bitcoin from 'bitcoinjs-lib';
 import { ECPairInterface } from 'ecpair';
 import axios from 'axios';
 
@@ -13,7 +13,7 @@ export class TransactionService {
 
     /**
      * Create a raw transaction.
-     */
+     *
     createTransaction(
         utxos: any[],
         toAddress: string,
@@ -59,7 +59,7 @@ export class TransactionService {
 
     /**
      * Sign a transaction with a private key.
-     */
+     *
     signTransaction(psbt: bitcoin.Psbt, keyPair: ECPairInterface): bitcoin.Psbt {
         const signer = toSigner(keyPair); // Convert ECPairInterface to Signer
         psbt.data.inputs.forEach((_, index) => {
@@ -70,7 +70,7 @@ export class TransactionService {
 
     /**
      * Broadcast a signed transaction to the Bitcoin network.
-     */
+     *
     async broadcastTransaction(hex: string): Promise<string> {
         const url = `${this.baseUrl}/tx`;
         const response = await axios.post(url, hex, {
@@ -81,7 +81,7 @@ export class TransactionService {
 
     /**
      * Send a transaction (combines create, sign, and broadcast).
-     */
+     *
     async sendTransaction(
         utxos: any[],
         toAddress: string,
@@ -103,4 +103,4 @@ function toSigner(keyPair: ECPairInterface): bitcoin.Signer {
         publicKey: Buffer.from(keyPair.publicKey),
         sign: (hash: Buffer) => Buffer.from(keyPair.sign(hash)),
     };
-}
+}*/

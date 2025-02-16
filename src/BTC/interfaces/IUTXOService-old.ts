@@ -1,5 +1,5 @@
-import { httpClient } from '../../utils/httpClient';
-import { IConfigurationReader } from '../../utils/IConfigurationReader-old';
+import { httpClient } from '../../utils/httpClient.js';
+import { IConfigurationReader } from '../../utils/IConfigurationReader-old.js';
 
 export interface IUTXOService {
     getUTXOsByAddress(address: string): Promise<any>; 

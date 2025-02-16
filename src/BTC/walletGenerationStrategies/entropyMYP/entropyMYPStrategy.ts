@@ -1,8 +1,8 @@
 import BIP32Factory, { BIP32Interface } from 'bip32';
-import RootKeyStrategy from '../rootKeyStrategy';
+import RootKeyStrategy from '../rootKeyStrategy.js';
 import * as bitcoin from 'bitcoinjs-lib';
 import * as ecc from 'tiny-secp256k1';
-import { EntropyToSeed } from '../../../utils/entropyToSeed';
+import { EntropyToSeed } from '../../../utils/entropyToSeed.js';
 const bip32 = BIP32Factory(ecc);
 
 export class EntropyMYPStrategy implements RootKeyStrategy {

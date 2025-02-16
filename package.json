@@ -10,10 +10,11 @@
     "tiny-secp256k1": "^2.2.3"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "rimraf dist && mkdir dist && tsc",
     "start": "node dist/index.js",
-    "dev": "ts-node src/index.ts"
+    "dev": "ts-node src/index.js"
   },
+  "type": "module",
   "main": "dist/index.js",
   "devDependencies": {
     "@types/express": "^5.0.0",

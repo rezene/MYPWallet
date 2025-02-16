@@ -36,3 +36,17 @@ Root BIP32 {
   __PARENT_FINGERPRINT: 0
 }
 Generated Address: ms56iVZMGxitDhsZKuch8jQVqDpuxJ8Po6
+1. Address-seed: mihrFJWP6jtzxdSGpo43EVCNbrTr6kN7ek: 
+We sent 0.00023826 bitcoins to address
+mihrFJWP6jtzxdSGpo43EVCNbrTr6kN7ek
+
+tx: 56ee1d4fc677099845a18109e7e1715521710555429565946f30431dc4a7cc93
+Send coins back, when you don't need them anymore to the address
+
+tb1qerzrlxcfu24davlur5sqmgzzgsal6wusda40er
+
+2. deriveMainAddress: msgdjK1ihUoiVDGrrZnCSWjWVEybtQ4LC9
+3. balance in change address: mqeNZo3SG8BTNYu4v6Atsnocppjw5GF6A7 23026  already tranfered to number 4
+4. deriveMainAddress: tb1qs4mzcygsqyty0qs26l7y5ctu5j9x3qm3jznncx
+balance main address: 500
+balance in change address: tb1qwj0a9vp8jaapxw7e33sn3n2gwvnx53pjdazg8e 22226

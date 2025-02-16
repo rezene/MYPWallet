@@ -1,13 +1,32 @@
-
 {
   "compilerOptions": {
-    "target": "ES6",
-    "module": "commonjs",
-    "outDir": "./dist",
-    "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true
+    /* Basic Options */
+    "target": "es2022", // Modern JavaScript features
+    "module": "node16", // Use ES modules (ESM)
+    "moduleResolution": "node16", // Modern module resolution
+    "outDir": "./dist", // Output directory for compiled files
+    "rootDir": "./src", // Source directory
+    "strict": true, // Enable all strict type-checking options
+    "esModuleInterop": true, // Enable ES module interoperability
+    "skipLibCheck": true, // Skip type-checking of declaration files
+    "forceConsistentCasingInFileNames": true, // Ensure consistent file casing
+    "allowJs": true, // Allow importing JavaScript files
+    "checkJs": true, // Type-check JavaScript files
+    "resolveJsonModule": true, // Allow importing JSON files
+
+    /* Linting and Code Quality */
+    "noUnusedLocals": false, // Error on unused locals
+    "noUnusedParameters": true, // Error on unused parameters
+    "noImplicitReturns": true, // Error if not all code paths return a value
+    "noFallthroughCasesInSwitch": true, // Error on fallthrough in switch cases
+
+    /* Advanced */
+    "incremental": true, // Enable incremental compilation for faster builds
+    "sourceMap": true, // Generate source maps for debugging
+    "declaration": true, // Generate .d.ts declaration files
+    "declarationMap": true, // Generate source maps for declaration files
+    "composite": true // Enable project references (optional)
   },
-  "include": ["src/**/*"]
+  "include": ["src/**/*"], // Include all files in the src directory
+  "exclude": ["node_modules", "dist"] // Exclude node_modules and output directory
 }
