@@ -6,6 +6,7 @@ import { BIP32Interface } from 'bip32';
 // You must wrap a tiny-secp256k1 compatible implementation
 const bip32 = BIP32Factory(ecc);
 import { MnemonicStrategySelector } from './BTC/walletGenerationStrategies/mnemonic/mnemonicStrategySelector.js';
+import { EntropyStrategySelector } from './BTC/walletGenerationStrategies/entropy/entropyStrategySelector.js';
 import {EntropyMYPStrategySelector} from './BTC/walletGenerationStrategies/entropyMYP/entropyMYPStrategySelector.js'
 
 import crypto from 'crypto';
@@ -19,6 +20,7 @@ console.log("myp2 lenght", myp2.length)
 
 //const mnemonic= "moment wing lobster public flag palm cradle robot attract shoot screen prevent";
 //const wallet = new BitcoinWallet(mnemonic, network);
+ // const entropySelector = new EntropyMYPStrategySelector(entropy, network);
 /*
 const mnemonicSelector = new MnemonicStrategySelector(mnemonic, network);
 const wallet = new BitcoinWallet(mnemonicSelector, network);
