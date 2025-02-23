@@ -1,18 +1,21 @@
 import express, { Request, Response, NextFunction } from 'express';
-import apiRouter from './routes/apis.js';
-
+import apiRouter from './controller/BitcoinController.js';
+import cors from 'cors';
 const app = express();
 
 // Middleware to parse JSON bodies
 app.use(express.json());
-
+app.use(cors());
+app.use(cors({
+    origin: 'http://localhost:5173' // Replace with your frontend URL
+}));
 // Routes
 app.use('/wallet', apiRouter);
 
 // Root route
 app.get('/', (req: Request, res: Response) => {
     console.log(req.body)
-    res.send('Hello, World!');
+    res.send('Wallet server is running');
 });
 
 // Error handling middleware

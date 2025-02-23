@@ -169,6 +169,7 @@ createTransaction:
 
 Creates a raw transaction (PSBT - Partially Signed Bitcoin Transaction) using UTXOs, a recipient address, and a change address.
 
+
 signTransaction:
 
 Signs the transaction using a private key (ECPair).
@@ -189,3 +190,198 @@ Key Pair: Replace the keyPair with your actual private key or use a library like
 Error Handling: Add proper error handling for production use.
 
 Fee Calculation: The fee calculation is simplified. You can improve it by dynamically calculating the transaction size.
+
+
+
+
+
+import * as bitcoin from 'bitcoinjs-lib';
+import { BIP32Interface } from 'bip32';
+import * as ecc from 'tiny-secp256k1';
+import StrategySelector from './walletGenerationStrategies/strategySelector.js';
+import { httpClient } from '../utils/httpClient.js';
+export class BitcoinWallet {
+    private network: bitcoin.Network;
+    private root: BIP32Interface;
+    constructor(strategySelector: StrategySelector, network: bitcoin.Network) {
+        this.network = network;
+        const strategy = strategySelector.selectStrategy();
+        this.root = strategy.generateRoot();
+    }
+
+    getNetwork(): bitcoin.Network {
+        return this.network;
+    }
+    getRoot(): BIP32Interface {
+        return this.root;
+    }
+
+    async createTransaction(
+        recipientAddress: string,
+        amount: number,
+        fee: number,
+        utxos: any[]
+    ): Promise<string> { // Return the transaction ID after broadcasting
+        const psbt = new bitcoin.Psbt({ network: this.network });
+
+        let totalInput = 0;
+        console.log(utxos);
+        // Add inputs (UTXOs)
+        for (const utxo of utxos) {
+            const input: any = {
+                hash: utxo.txid,
+                index: utxo.vout,
+            };
+
+            // Check if the script is SegWit (P2WPKH or P2WSH)
+            if (utxo.scriptPubKey.startsWith('0014') || utxo.scriptPubKey.startsWith('0020')) {
+                // SegWit script: Use witnessUtxo
+                input.witnessUtxo = {
+                    script: Buffer.from(utxo.scriptPubKey, 'hex'),
+                    value: utxo.value,
+                };
+            } else {
+                // Non-SegWit script: Use nonWitnessUtxo
+                const txHex = await this.fetchTransactionHex(utxo.txid); // Fetch the full transaction hex
+                input.nonWitnessUtxo = Buffer.from(txHex, 'hex');
+            }
+
+            psbt.addInput(input);
+            totalInput += utxo.value;
+        }
+
+        const remainingValue = totalInput - Number(amount) - fee;
+
+
+        if (remainingValue < 0) {
+            throw new Error('Insufficient funds to cover the amount and fee.');
+        }
+
+        // Validate recipient address
+        try {
+            bitcoin.address.toOutputScript(recipientAddress, this.network);
+        } catch (error) {
+            throw new Error(`Invalid recipient address: ${recipientAddress}`);
+        }
+
+        try {
+            psbt.addOutput({
+                address: recipientAddress,
+                value: Number(amount),
+            });
+            console.log('Recipient output added successfully.');
+        } catch (error) {
+            console.error('Error adding recipient output:', error);
+            throw error;
+        }
+
+        if (remainingValue > 0) {
+            try {
+                psbt.addOutput({
+                    address: this.deriveAdress(utxos.length),
+                    value: remainingValue,
+                });
+                console.log('Change output added successfully.');
+            } catch (error) {
+                console.error('Error adding change output:', error);
+                throw error;
+            }
+        }
+
+        for (let i = 0; i < utxos.length; i++) {
+            let path: string;
+          
+            // Determine the derivation path based on the UTXO address
+            const utxoAddress = utxos[i].address;
+            const isMainAddress = utxoAddress === this.deriveMainAddress(0); // Check if the UTXO belongs to the main address
+          
+            if (isMainAddress) {
+              // Use the main address derivation path (m/44'/1'/0'/0/index)
+              path = `m/44'/1'/0'/0/${i}`;
+            } else {
+              // Use the change address derivation path (m/44'/1'/0'/1/index)
+              path = `m/44'/1'/0'/1/${i}`;
+            }
+          
+            // Derive the child node
+            const child = this.root.derivePath(path);
+            
+          
+            // Get the address from the derived public key
+            const derivedAddress = bitcoin.payments.p2wpkh({
+              pubkey: Buffer.from(child.publicKey), // Convert Uint8Array to Buffer
+              network: this.network,
+            }).address;
+            console.log('Derived Address:', derivedAddress);
+            console.log('UTXO Address:', utxos[i].address);
+          
+            if (!child.privateKey) {
+              throw new Error('Private key not available for signing');
+            }
+          
+            // Create a signer object
+            const signer = {
+              publicKey: Buffer.from(child.publicKey), // Convert Uint8Array to Buffer
+              sign: (hash: Buffer) => {
+                const signature = ecc.sign(hash, child.privateKey!);
+                return Buffer.from(signature); // Convert Uint8Array to Buffer
+              },
+            };
+          
+            // Sign the input
+            psbt.signInput(i, signer);
+            console.log(`Input ${i} signed successfully.`);
+          }
+          
+        
+        // Finalize and extract the transaction
+        psbt.finalizeAllInputs();
+        const tx = psbt.extractTransaction();
+
+        const rawTx = tx.toHex();
+        const txId = await this.broadcastTransaction(rawTx);
+
+        return txId;
+    }
+
+    deriveAdress(index: number) {
+        if (index >= 1)
+            index = index - 1;
+        const changeAddress = bitcoin.payments.p2wpkh({
+            pubkey: Buffer.from(this.root.derive(1).derive(index).publicKey), // Derive change address (path m/44'/1'/0'/1/index)
+            network: this.network,
+        }).address!;
+        return changeAddress;
+    }
+
+     deriveMainAddress(index:number): string {
+        const mainAddress = bitcoin.payments.p2wpkh({
+            pubkey: Buffer.from(this.root.derive(0).derive(index).publicKey), // Derive main address (path m/44'/1'/0'/0/index)
+            network: this.network,
+        }).address!;
+        return mainAddress;
+       
+    }
+    async fetchTransactionHex(txid: string): Promise<string> {
+        const url = `/tx/${txid}/hex`;
+        const response = await httpClient.get(url);
+        return response.data;
+    }
+
+    async broadcastTransaction(hex: string): Promise<string> {
+        try {
+            const url = `/tx`;
+            const response = await httpClient.post(url, hex, {
+                headers: { 'Content-Type': 'text/plain' },
+            });
+            return response.data;
+        } catch (error) {
+            if (error instanceof Error) {
+                console.error('Error broadcasting transaction:', error.message);
+            } else {
+                console.error('An unknown error occurred:', error);
+            }
+            throw error; // Re-throw the error to propagate it
+        }
+    }
+}

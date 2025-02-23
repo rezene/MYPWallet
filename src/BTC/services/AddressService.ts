@@ -5,44 +5,62 @@ import { BIP32Interface } from 'bip32';
 const bip32 = BIP32Factory(ecc);
 
 export class AddressService {
-    private xpub:string;
-    private network:any;
-    constructor(xpub:string,network:any){
-     this.xpub=xpub;
+    private node:BIP32Interface;
+    private network;
+    constructor(node:BIP32Interface, network:any){
+     this.node=node;
      this.network=network;
     }
-// Derive main addresses (path m/44'/1'/0'/0/n)
- deriveMainAddress(index:number): string {
-    const node: BIP32Interface = bip32.fromBase58(this.xpub, this.network);
+// external and main addresses (path m/44'/1'/0'/0/n)
+deriveExternalAddress(index: number): string {
+    // Derive the BIP44-compliant path for external addresses: m/44'/1'/0'/0/n
+    const child = this.node
+        .deriveHardened(44) // Purpose (BIP44)
+        .deriveHardened(this.network === bitcoin.networks.bitcoin ? 0 : 1) // Coin type (0 for mainnet, 1 for testnet)
+        .deriveHardened(0) // Account index
+        .derive(0) // External chain
+        .derive(index); // Address index
+
+    // Generate the P2WPKH address
     const mainAddress = bitcoin.payments.p2wpkh({
-        pubkey: Buffer.from(node.derive(0).derive(index).publicKey), // Derive main address (path m/44'/1'/0'/0/index)
+        pubkey: Buffer.from(child.publicKey), // Convert Uint8Array to Buffer
         network: this.network,
     }).address!;
+
     return mainAddress;
-   
 }
 
 // Derive change addresses (path m/44'/1'/0'/1/n)
- deriveChangeAddress(index:number): string {
-    const node: BIP32Interface = bip32.fromBase58(this.xpub, this.network);
+deriveChangeAddress(index: number): string {
+    // Derive the BIP44-compliant path for change addresses: m/44'/1'/0'/1/n
+    const child = this.node
+        .deriveHardened(44) // Purpose (BIP44)
+        .deriveHardened(this.network === bitcoin.networks.bitcoin ? 0 : 1) // Coin type (0 for mainnet, 1 for testnet)
+        .deriveHardened(0) // Account index
+        .derive(1) // Change chain
+        .derive(index); // Address index
+
+    // Generate the P2WPKH address
     const changeAddress = bitcoin.payments.p2wpkh({
-        pubkey: Buffer.from(node.derive(1).derive(index).publicKey), // Derive change address (path m/44'/1'/0'/1/index)
+        pubkey: Buffer.from(child.publicKey), // Convert Uint8Array to Buffer
         network: this.network,
     }).address!;
+
     return changeAddress;
 }
 
+
 /*
-    generateAccountXpub(rootNode: bip32.BIP32Interface, accountIndex: number = 0): string {
+    generateAccountxpriv(rootNode: bip32.BIP32Interface, accountIndex: number = 0): string {
         // Derive the account node
         const accountNode = rootNode
             .deriveHardened(44)  // Purpose (BIP44)
             .deriveHardened(0)   // Coin type (Bitcoin)
             .deriveHardened(accountIndex); // Account index
     
-        // Neutered the account node to get the xpub
-        const accountXpub = accountNode.neutered().toBase58();
-        return accountXpub;
+        // Neutered the account node to get the xpriv
+        const accountxpriv = accountNode.neutered().toBase58();
+        return accountxpriv;
     }
 
   */

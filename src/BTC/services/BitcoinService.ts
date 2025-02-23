@@ -1,15 +1,15 @@
 import { AddressService } from './AddressService.js';
 import { WalletBalanceService } from './WalletBalanceService.js';
 import { UtxoService } from './UtxoService.js';
-
+import { BIP32Interface } from 'bip32';
 
 export class BitcoinService {
     private addressService: AddressService;
     private walletBalanceService: WalletBalanceService;
     private utxoService: UtxoService;
 
-    constructor(xpub: string, netowrk: any, httpClient: any) {
-        this.addressService = new AddressService(xpub, netowrk);
+    constructor(node: BIP32Interface, netowrk: any, httpClient: any) {
+        this.addressService = new AddressService(node, netowrk);
         this.walletBalanceService = new WalletBalanceService(this.addressService);
         this.utxoService = new UtxoService(httpClient);
     }

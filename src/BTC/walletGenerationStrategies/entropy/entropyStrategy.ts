@@ -3,6 +3,7 @@ import BIP32Factory, { BIP32Interface } from 'bip32';
 import RootKeyStrategy from '../rootKeyStrategy.js';
 import * as bip39 from 'bip39';
 import * as ecc from 'tiny-secp256k1';
+import { EntropyToValidEntropy } from '../../../utils/entropyToSeed.js';
 const bip32 = BIP32Factory(ecc);
 
 
@@ -16,7 +17,9 @@ export class EntropyStrategy implements RootKeyStrategy {
     }
 
     generateRoot(): BIP32Interface {
-        const mnemonic=bip39.entropyToMnemonic(this.entropy);
+        const entropy= EntropyToValidEntropy(this.entropy)
+        const mnemonic=bip39.entropyToMnemonic(entropy);
+        console.log("menemonics", mnemonic);
         const seed = bip39.mnemonicToSeedSync(mnemonic);
         return bip32.fromSeed(seed, this.network);
     }

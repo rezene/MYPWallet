@@ -16,8 +16,10 @@ import { httpClient } from './utils/httpClient.js';
 const network=  bitcoin.networks.testnet;
 const myp2='f0bZbra0kgyjUdwQLG1xWhtjN6iIScWbjscaeZlvP8ioc8mo1SgXSELgS6ScF1cL74NEDntXp9go38fwlQSHwstP6iSy0UIEJyq6wt0G4IpssDeIop8douXzw5doC4eG'
 console.log("myp2 lenght", myp2.length)
+
 //console.log(entropyToBIP39Menemonic(myp2));
 
+//const mnemonic = bip39.generateMnemonic(); //cryptographically secure random number generator (CSPRNG). const entropy = crypto.randomBytes(16);
 //const mnemonic= "moment wing lobster public flag palm cradle robot attract shoot screen prevent";
 //const wallet = new BitcoinWallet(mnemonic, network);
  // const entropySelector = new EntropyMYPStrategySelector(entropy, network);
@@ -38,11 +40,11 @@ const xpriv: string = node.toBase58();
 const xpub = node.neutered().toBase58();
 console.log("xpriv", xpriv);
 console.log("xpub", xpub);
-
+/*
 const btcService= new BitcoinService(xpub,network,httpClient);
 try{
 const totalBalance =await btcService.getWalletBalanceService().getWalletBalance(0);
-const mainAddress=btcService.getAddressService().deriveMainAddress(0);
+const mainAddress=btcService.getAddressService().deriveExternalAddress(0);
 console.log('deriveMainAddress:', mainAddress);
 console.log('balance main address:', await btcService.getWalletBalanceService().getBalance(mainAddress));
 const changeAddress=await btcService.getAddressService().deriveChangeAddress(0);

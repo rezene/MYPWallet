@@ -4,10 +4,10 @@ import { xPrivStrategy } from "./xPrivStrategy.js";
 
 
 export class xPrivStrategySelector implements StrategySelector {
-    private xPriv: Buffer | string;
+    private xPriv: string; //Buffer | 
     private network: any;
 
-    constructor(xPriv: Buffer|string, network: any) {
+    constructor(xPriv: string, network: any) {
         this.xPriv = xPriv;
         this.network = network;
     }

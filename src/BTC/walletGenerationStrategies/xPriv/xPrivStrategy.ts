@@ -4,16 +4,15 @@ import * as ecc from 'tiny-secp256k1';
 const bip32 = BIP32Factory(ecc);
 
 export class xPrivStrategy implements RootKeyStrategy {
-    private xPriv:  Buffer | string; // Extended private key (can be Buffer or hex string)
+    private xPriv:  string; // Buffer |  Extended private key (can be Buffer or hex string)
     private network: any;
 
-    constructor(xPriv: Buffer | string, network: any) {
+    constructor(xPriv:  string, network: any) {
         this.xPriv = xPriv;
         this.network = network;
     }
 
     generateRoot(): BIP32Interface {
-        const xPrivBuffer = typeof this.xPriv === 'string' ? Buffer.from(this.xPriv, 'hex') : this.xPriv;
-        return bip32.fromSeed(xPrivBuffer, this.network);
+        return bip32.fromBase58(this.xPriv, this.network);
     }
 }
