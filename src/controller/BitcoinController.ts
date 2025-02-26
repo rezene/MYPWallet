@@ -6,6 +6,7 @@ import {EntropyMYPStrategySelector} from '../BTC/walletGenerationStrategies/entr
 import { EntropyStrategySelector } from '../BTC/walletGenerationStrategies/entropy/entropyStrategySelector.js';
 import { BitcoinServiceInterface } from '../BTC/interfaces/BitcoinServiceInterface.js';
 import { xPrivStrategySelector } from '../BTC/walletGenerationStrategies/xPriv/xPrivStrategySelector.js';
+import { MnemonicStrategySelector } from '../BTC/walletGenerationStrategies/mnemonic/mnemonicStrategySelector.js';
 
 const myp2 = 'f0bZbra0kgyjUdwQLG1xWhtjN6iIScWbjscaeZlvP8ioc8mo1SgXSELgS6ScF1cL74NEDntXp9go38fwlQSHwstP6iSy0UIEJyq6wt0G4IpssDeIop8douXzw5doC4eG'
 
@@ -22,6 +23,8 @@ router.post('/balance', async (req: Request, res: Response) =>  {
    service= new BitcoinServiceInterface(entropy, EntropyStrategySelector);
     else if (role=='xPriv')
     service= new BitcoinServiceInterface(entropy, xPrivStrategySelector);
+   else if (role==='Seed Phrase')
+    service= new BitcoinServiceInterface(entropy, MnemonicStrategySelector);
    else
     service= new BitcoinServiceInterface(entropy, EntropyMYPStrategySelector);
  
@@ -44,9 +47,10 @@ router.post('/derived-address', async (req: Request, res: Response) => {
     let service;
     if (role==='Entropy')
    service= new BitcoinServiceInterface(entropy, EntropyStrategySelector);
-    else if (role=='xPriv'){ 
+    else if (role=='xPriv')
     service= new BitcoinServiceInterface(entropy, xPrivStrategySelector);
-    }
+    else if (role==='Seed Phrase')
+        service= new BitcoinServiceInterface(entropy, MnemonicStrategySelector);
    else 
     service= new BitcoinServiceInterface(entropy, EntropyMYPStrategySelector);
  
@@ -62,6 +66,8 @@ router.post('/transfer', async (req: Request, res: Response) => {
    service= new BitcoinServiceInterface(entropy, EntropyStrategySelector);
     else if (role=='xPriv')
     service= new BitcoinServiceInterface(entropy, xPrivStrategySelector);
+    else if (role==='Seed Phrase')
+        service= new BitcoinServiceInterface(entropy, MnemonicStrategySelector);
    else
     service= new BitcoinServiceInterface(entropy, EntropyMYPStrategySelector);
  
@@ -78,6 +84,8 @@ router.post('/transactions', async (req: Request, res: Response) => {
    service= new BitcoinServiceInterface(entropy, EntropyStrategySelector);
     else if (role=='xPriv')
     service= new BitcoinServiceInterface(entropy, xPrivStrategySelector);
+    else if (role==='Seed Phrase')
+        service= new BitcoinServiceInterface(entropy, MnemonicStrategySelector);
    else
     service= new BitcoinServiceInterface(entropy, EntropyMYPStrategySelector);
  

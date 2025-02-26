@@ -5,7 +5,6 @@ import * as bip39 from 'bip39';
 import * as ecc from 'tiny-secp256k1';
 const bip32 = BIP32Factory(ecc);
 
-
 export class MnemonicStrategy implements RootKeyStrategy {
     private mnemonic: string;
     private network: bitcoin.Network;

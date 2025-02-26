@@ -57,8 +57,8 @@ export class BitcoinServiceInterface {
     }
    
     async init() {
-        this.externalAddresses = await this.getExternalAddresses(8);
-        this.internalAddresses = await this.getChangeAddresses(8);
+        this.externalAddresses = await this.getExternalAddresses(5);
+        this.internalAddresses = await this.getChangeAddresses(5);
        // this.utxos=[...this.utxosExternal, ...this.utxosInternal]
        this.utxos = [
         ...this.utxosExternal.map(utxo => ({
@@ -97,6 +97,7 @@ export class BitcoinServiceInterface {
     async getRecevingAddress(){
         if (!this.isInit)
         await this.init();
+ 
         return this.getExternalAddress(this.externalAddresses.length);
     }
     getChangeAddress(index: number) {

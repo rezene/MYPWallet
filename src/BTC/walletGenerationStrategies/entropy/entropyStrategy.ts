@@ -6,7 +6,6 @@ import * as ecc from 'tiny-secp256k1';
 import { EntropyToValidEntropy } from '../../../utils/entropyToSeed.js';
 const bip32 = BIP32Factory(ecc);
 
-
 export class EntropyStrategy implements RootKeyStrategy {
     private entropy: string;
     private network: bitcoin.Network;
@@ -19,7 +18,6 @@ export class EntropyStrategy implements RootKeyStrategy {
     generateRoot(): BIP32Interface {
         const entropy= EntropyToValidEntropy(this.entropy)
         const mnemonic=bip39.entropyToMnemonic(entropy);
-        console.log("menemonics", mnemonic);
         const seed = bip39.mnemonicToSeedSync(mnemonic);
         return bip32.fromSeed(seed, this.network);
     }
