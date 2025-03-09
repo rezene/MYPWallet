@@ -2,19 +2,17 @@ import { BitcoinWallet } from '../BitcoinWallet.js';
 import BIP32Factory from 'bip32';
 import * as ecc from 'tiny-secp256k1';
 import { BIP32Interface } from 'bip32';
-import bitcoin from 'bitcoinjs-lib';
 import * as bip39 from 'bip39';
 const bip32 = BIP32Factory(ecc);
 import { httpClient } from '../../utils/httpClient.js';
 import { BitcoinService } from '../services/BitcoinService.js';
 import { UTXO } from '../services/UtxoService.js';
 import { EntropyToValidEntropy } from '../../utils/entropyToSeed.js';
+import { networks } from '../../config/networks.js';
 
 
 //const myp2 = 'f0bZbra0kgyjUdwQLG1xWhtjN6iIScWbjscaeZlvP8ioc8mo1SgXSELgS6ScF1cL74NEDntXp9go38fwlQSHwstP6iSy0UIEJyq6wt0G4IpssDeIop8douXzw5doC4eG'
 //console.log("myp2 lenght", myp2.length)
-
-
 
 export class BitcoinServiceInterface {
     private btcService: BitcoinService;
@@ -37,7 +35,7 @@ export class BitcoinServiceInterface {
 
         this.httpClient = httpClient;
         this.entropy = entropy;
-        this.network = bitcoin.networks.testnet;;
+        this.network = networks.bitcoin;
         this.strategySelector = new strategySelector(this.entropy, this.network);
         this.wallet = new BitcoinWallet(this.strategySelector, this.network);
         this.node = this.wallet.getRoot();

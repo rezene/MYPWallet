@@ -7,7 +7,9 @@ function EntropyToSeed(entropy: string) {
 function EntropyToValidEntropy(entropy:string){
     const sha3 = new SHA3(256)
     sha3.update(entropy);   
-    return sha3.digest();   
+    const resp=sha3.digest()
+    console.log("Entropy:", sha3.digest('hex'));
+    return resp;   
 }
 
 export {EntropyToSeed, EntropyToValidEntropy};

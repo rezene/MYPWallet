@@ -89,7 +89,7 @@ export class UtxoService{
                 value: tx.value
             }))
             .sort((a, b) => {
-                // Sort by block_time in descending order
+             
                 return new Date(b.block_time).getTime() - new Date(a.block_time).getTime();
             });
     }

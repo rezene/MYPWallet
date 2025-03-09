@@ -13,3 +13,4 @@ function GenerateMnemonicFromEntropy(entropy: string): string {
     return mnemonic;
 }
 export default GenerateMnemonicFromEntropy;
+

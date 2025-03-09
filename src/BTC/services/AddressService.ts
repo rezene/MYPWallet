@@ -13,17 +13,15 @@ export class AddressService {
     }
 // external and main addresses (path m/44'/1'/0'/0/n)
 deriveExternalAddress(index: number): string {
-    // Derive the BIP44-compliant path for external addresses: m/44'/1'/0'/0/n
     const child = this.node
-        .deriveHardened(44) // Purpose (BIP44)
-        .deriveHardened(this.network === bitcoin.networks.bitcoin ? 0 : 1) // Coin type (0 for mainnet, 1 for testnet)
-        .deriveHardened(0) // Account index
-        .derive(0) // External chain
-        .derive(index); // Address index
-
-    // Generate the P2WPKH address
+        .deriveHardened(44)
+        .deriveHardened(this.network === bitcoin.networks.bitcoin ? 0 : 1) 
+        .deriveHardened(0) 
+        .derive(0) 
+        .derive(index); 
+    
     const mainAddress = bitcoin.payments.p2wpkh({
-        pubkey: Buffer.from(child.publicKey), // Convert Uint8Array to Buffer
+        pubkey: Buffer.from(child.publicKey), 
         network: this.network,
     }).address!;
 
@@ -32,15 +30,13 @@ deriveExternalAddress(index: number): string {
 
 // Derive change addresses (path m/44'/1'/0'/1/n)
 deriveChangeAddress(index: number): string {
-    // Derive the BIP44-compliant path for change addresses: m/44'/1'/0'/1/n
     const child = this.node
-        .deriveHardened(44) // Purpose (BIP44)
-        .deriveHardened(this.network === bitcoin.networks.bitcoin ? 0 : 1) // Coin type (0 for mainnet, 1 for testnet)
-        .deriveHardened(0) // Account index
-        .derive(1) // Change chain
-        .derive(index); // Address index
+        .deriveHardened(44)
+        .deriveHardened(this.network === bitcoin.networks.bitcoin ? 0 : 1) 
+        .deriveHardened(0) 
+        .derive(1)
+        .derive(index);
 
-    // Generate the P2WPKH address
     const changeAddress = bitcoin.payments.p2wpkh({
         pubkey: Buffer.from(child.publicKey), // Convert Uint8Array to Buffer
         network: this.network,
@@ -54,11 +50,10 @@ deriveChangeAddress(index: number): string {
     generateAccountxpriv(rootNode: bip32.BIP32Interface, accountIndex: number = 0): string {
         // Derive the account node
         const accountNode = rootNode
-            .deriveHardened(44)  // Purpose (BIP44)
-            .deriveHardened(0)   // Coin type (Bitcoin)
-            .deriveHardened(accountIndex); // Account index
-    
-        // Neutered the account node to get the xpriv
+            .deriveHardened(44)  
+            .deriveHardened(0)   
+            .deriveHardened(accountIndex); 
+        
         const accountxpriv = accountNode.neutered().toBase58();
         return accountxpriv;
     }

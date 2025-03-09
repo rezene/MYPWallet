@@ -10,7 +10,6 @@ export class BitcoinWallet {
     private root: BIP32Interface;
     
     constructor(strategySelector: StrategySelector, network: bitcoin.Network) {
-        console.log(strategySelector.selectStrategy());
         this.network = network;
         const strategy = strategySelector.selectStrategy();
         this.root = strategy.generateRoot();
@@ -53,13 +52,12 @@ export class BitcoinWallet {
             totalInput += utxo.value;
         }
     
-        // Add outputs
+       
         const remainingValue = totalInput - amount - fee;
         if (remainingValue < 0) throw new Error(`Insufficient funds, exceeded by ${remainingValue}`);
         psbt.addOutput({ address: recipientAddress, value: Number(amount) });
         if (remainingValue > 0) psbt.addOutput({ address: this.changeAddress(utxosInternal.length), value: remainingValue });
     
-        // Sign inputs
         for (let i = 0; i < utxosExternal.length; i++) {
             const utxoAddress = utxosExternal[i].address;
             let child: BIP32Interface | undefined;
@@ -91,7 +89,7 @@ export class BitcoinWallet {
         for (let i = 0; i < utxosInternal.length; i++) {
             const utxoAddress = utxosInternal[i].address;
             let child: BIP32Interface | undefined;
-            // Check change addresses if no match
+            
             if (!child) {
                 for (let idx = 0; idx < 100; idx++) {
                     const derivedAddr = this.changeAddress(idx);
@@ -129,17 +127,16 @@ export class BitcoinWallet {
 
 changeAddress(index: number): string {
 
-    // Derive the BIP44-compliant path for change addresses: m/44'/1'/0'/1/n
-    const child = this.root
-        .deriveHardened(44) // Purpose (BIP44)
-        .deriveHardened(this.network === bitcoin.networks.bitcoin ? 0 : 1) // Coin type (0 for mainnet, 1 for testnet)
-        .deriveHardened(0) // Account index
-        .derive(1) // Change chain
-        .derive(index); // Address index
 
-    // Generate the P2WPKH address
+    const child = this.root
+        .deriveHardened(44) 
+        .deriveHardened(this.network === bitcoin.networks.bitcoin ? 0 : 1) 
+        .deriveHardened(0) 
+        .derive(1) 
+        .derive(index); 
+
     const changeAddress = bitcoin.payments.p2wpkh({
-        pubkey: Buffer.from(child.publicKey), // Convert Uint8Array to Buffer
+        pubkey: Buffer.from(child.publicKey), 
         network: this.network,
     }).address!;
 
@@ -149,17 +146,16 @@ changeAddress(index: number): string {
     deriveExternalAddress(index: number): string {
     //const node = bip32.fromBase58(this.root.toBase58(), this.network);
 
-    // Derive the BIP44-compliant path for external addresses: m/44'/1'/0'/0/n
     const child = this.root
-        .deriveHardened(44) // Purpose (BIP44)
-        .deriveHardened(this.network === bitcoin.networks.bitcoin ? 0 : 1) // Coin type (0 for mainnet, 1 for testnet)
-        .deriveHardened(0) // Account index
-        .derive(0) // External chain
-        .derive(index); // Address index
+        .deriveHardened(44) 
+        .deriveHardened(this.network === bitcoin.networks.bitcoin ? 0 : 1) 
+        .deriveHardened(0) 
+        .derive(0) 
+        .derive(index); 
 
     // Generate the P2WPKH address
     const mainAddress = bitcoin.payments.p2wpkh({
-        pubkey: Buffer.from(child.publicKey), // Convert Uint8Array to Buffer
+        pubkey: Buffer.from(child.publicKey), 
         network: this.network,
     }).address!;
 
@@ -180,12 +176,11 @@ changeAddress(index: number): string {
             throw new Error('Private key not available for signing');
         }
 
-        // Create a signer object
         const signer = {
             publicKey: Buffer.from(child.publicKey),
             sign: (hash: Buffer) => {
                 const signature = ecc.sign(hash, child.privateKey!);
-                return Buffer.from(signature); // Convert Uint8Array to Buffer
+                return Buffer.from(signature); 
             },
         };
 
@@ -206,7 +201,7 @@ changeAddress(index: number): string {
             } else {
                 console.error('An unknown error occurred:', error);
             }
-            throw error; // Re-throw the error to propagate it
+            throw error; 
         }
     }
 }
